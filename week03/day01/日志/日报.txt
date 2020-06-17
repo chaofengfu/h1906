@@ -1,0 +1,56 @@
+2020/06/16
+	学习大纲：
+		订单
+			- 订单分析
+			- 用户身份认证
+			- 展示订单确认页面
+			
+		一、订单分析
+			1、在购物车页面点击“去结算”按钮跳转到订单确认页面
+				a) 展示商品列表
+				
+			2、展示订单确认页面之前，应该确认用户身份
+				a) 如果用户未登录或登录过期跳转到登录页面
+				b) 登录成功后再跳转到订单确认页面
+			
+			
+		二、工程创建
+			usian_order_web
+			
+			usian_order_feign
+			
+			usian_order_service
+			
+		三、用户身份认证
+				在展示订单确认页面之前，需要对用户身份进行认证，要求用户必须登录。
+				
+			1、功能分析
+				使用springmvc的拦截器拦截所有订单的请求
+			2、业务逻辑
+				a)  从cookie中取token。
+				b) 根据token调用sso服务查询用户信息。
+				c) 如果查不到用户信息则跳转到登录页面。
+				d) 查询到用户信息放行。
+				
+			3、逻辑实现
+				在usian_order_web 中
+					a、配置一拦截器，实现 HandlerInterceptor 重写preHandle（请求前进行拦截）
+							对用户的token做判断和校验用户在redis中是否失效 如果为空返回false,反之返回true
+					b、拦截器配置类 实现 WebMvcConfigurer  重写addInterceptors（告诉springmvc要往容器中注入的是拦截器）
+						 配置 拦截哪个URI
+							registration.addPathPatterns("/frontend/order/**");
+		
+		四、展示订单确认页面
+			a、业务逻辑
+				1、在购物车页面点击“去结算”按钮跳转到订单确认页面。
+				2、请求的url：/frontend/order/goSettlement
+				3、参数：ids，userId，token
+				4、查询redis中的购物车数据并返回给前端
+				5、配送地址列表，需要用户登录。需要根据用户id查询收货地址列表。静态数据。
+				6、支付方式。静态数据。
+				
+			b、实现
+				1、注入	cartServiceFeignClient（获取购物车）
+				2、从购物车中获取选中的商品（前台传来的商品id数组 ids[]）
+				3、遍历数组（获取商品存入List集合返回前端）
+				
